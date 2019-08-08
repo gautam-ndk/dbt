@@ -1,7 +1,5 @@
 import abc
 import time
-import datetime
-import pytz
 
 import dbt.clients.agate_helper
 import dbt.exceptions
@@ -79,8 +77,8 @@ class SQLConnectionManager(BaseConnectionManager):
         )
 
     @classmethod
-    def process_results(cls, matrix):
-        return matrix
+    def process_results(cls, column_names, rows):
+        return [dict(zip(column_names, row)) for row in rows]
 
     @classmethod
     def get_result_from_cursor(cls, cursor):
@@ -89,10 +87,8 @@ class SQLConnectionManager(BaseConnectionManager):
 
         if cursor.description is not None:
             column_names = [col[0] for col in cursor.description]
-            raw_results = cursor.fetchall()
-            results = cls.process_results(raw_results)
-            data = [dict(zip(column_names, row))
-                    for row in results]
+            rows = cursor.fetchall()
+            data = cls.process_results(column_names, rows)
 
         return dbt.clients.agate_helper.table_from_data(data, column_names)
 
