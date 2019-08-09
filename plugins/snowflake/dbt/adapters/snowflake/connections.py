@@ -233,7 +233,9 @@ class SnowflakeConnectionManager(SQLConnectionManager):
                 if isinstance(col, datetime.datetime) and col.tzinfo:
                     offset = col.utcoffset()
                     offset_seconds = offset.total_seconds()
-                    new_timezone = OffsetTimezone(col.tzname(), offset_seconds)
+                    new_timezone = OffsetTimezone(
+                            dbt.compat.to_string(col.tzname()),
+                            offset_seconds)
                     col = col.astimezone(tz=new_timezone)
                 fixed_row.append(col)
 
